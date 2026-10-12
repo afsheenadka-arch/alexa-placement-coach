@@ -1,0 +1,13 @@
+{
+  "name": "alexa-placement-coach",
+  "version": "1.0.0",
+  "description": "Simulated Alexa+ experience that helps CS students prepare for placements",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.22.3"
+  }
+}
