@@ -25,6 +25,26 @@ const QUIZ = {
     ["Which sort is stable by default?", ["Quick sort", "Merge sort", "Heap sort"], 1],
     ["Worst case of quick sort?", ["O(n log n)", "O(n^2)", "O(n)"], 1],
   ],
+  "linked lists": [
+    ["Time to insert at the head of a linked list?", ["O(1)", "O(n)", "O(log n)"], 0],
+    ["Which technique detects a cycle in a linked list?", ["Fast and slow pointers", "Binary search", "Sorting"], 0],
+    ["Can you access the 5th node directly by index?", ["Yes, in O(1)", "No, you must traverse", "Only in doubly linked lists"], 1],
+  ],
+  trees: [
+    ["Inorder traversal of a BST gives nodes in what order?", ["Sorted", "Reverse sorted", "Random"], 0],
+    ["Height of a balanced binary tree with n nodes?", ["O(n)", "O(log n)", "O(1)"], 1],
+    ["Which traversal uses a queue?", ["Level order", "Inorder", "Preorder"], 0],
+  ],
+  graphs: [
+    ["Which traversal finds shortest paths in an unweighted graph?", ["BFS", "DFS", "Inorder"], 0],
+    ["Which structure does DFS use (iteratively)?", ["Stack", "Queue", "Heap"], 0],
+    ["Dijkstra's algorithm does not work with what?", ["Negative edge weights", "Directed graphs", "Connected graphs"], 0],
+  ],
+  dp: [
+    ["Dynamic programming works best when a problem has...", ["Overlapping subproblems", "No structure", "Only one solution"], 0],
+    ["Storing results of subproblems is called?", ["Memoization", "Recursion", "Sorting"], 0],
+    ["Naive recursive Fibonacci runs in?", ["O(n)", "O(2^n)", "O(log n)"], 1],
+  ],
 };
 
 const load = () => {
@@ -52,6 +72,7 @@ function plan() {
   const last = d.logs.length ? d.logs[d.logs.length - 1].topic : null;
   let msg = `Tonight: solve 2 ${weakest} problems, since it is your least practiced topic.`;
   if (last && last !== "general" && last !== weakest) msg += ` Then spend 15 minutes revising ${last}.`;
+  if (weakest in QUIZ) msg += ` After that, say "quiz me on ${weakest}" to test yourself.`;
   return msg;
 }
 
@@ -91,11 +112,11 @@ app.post("/api/command", (req, res) => {
     reply = answer(text.replace(/[^a-c]/g, ""));
   } else if (text.includes("quiz")) {
     const topic = Object.keys(QUIZ).find((t) => text.includes(t));
-    if (!topic) reply = "Which topic? Try: quiz me on arrays, strings, or sorting.";
+    if (!topic) reply = "Which topic? Try: quiz me on arrays, strings, sorting, linked lists, trees, graphs, or dp.";
     else { quiz = { qs: QUIZ[topic], i: 0, score: 0 }; reply = ask(); }
-  } else if (/solved|did|completed|log/.test(text)) reply = logProgress(text);
-  else if (/summary|week|how did i do/.test(text)) reply = summary();
-  else if (/plan|study|what should i/.test(text)) reply = plan();
+  } else if (/summary|weekly|how did i do/.test(text)) reply = summary();
+  else if (/plan|what should i/.test(text)) reply = plan();
+  else if (/solved|did|completed|log/.test(text)) reply = logProgress(text);
   else reply = "I can log your progress, plan tonight's study, quiz you, or summarize your week.";
   res.json({ reply });
 });
