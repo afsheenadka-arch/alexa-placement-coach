@@ -54,14 +54,18 @@ const save = (d) => fs.writeFileSync(DB, JSON.stringify(d, null, 2));
 
 let quiz = null; // active quiz state (single user demo)
 
-function logProgress(text) {
-  const m = text.match(/(\d+)/);
-  const count = m ? parseInt(m[1], 10) : 1;
-  const topic = TOPICS.find((t) => text.includes(t)) || "general";
+function addLog(topic, count) {
   const d = load();
   d.logs.push({ date: new Date().toISOString(), topic, count });
   save(d);
   return `Logged ${count} ${topic} problem${count > 1 ? "s" : ""}. Nice work, keep the streak going.`;
+}
+
+function logProgress(text) {
+  const m = text.match(/(\d+)/);
+  const count = m ? parseInt(m[1], 10) : 1;
+  const topic = TOPICS.find((t) => text.includes(t)) || "general";
+  return addLog(topic, count);
 }
 
 function plan() {
@@ -120,6 +124,9 @@ app.post("/api/command", (req, res) => {
   else reply = "I can log your progress, plan tonight's study, quiz you, or summarize your week.";
   res.json({ reply });
 });
+
+// MCP layer: exposes the same logic as tools over Streamable HTTP at /mcp
+require("./mcp")(app, { TOPICS, QUIZ, addLog, plan, summary });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Alexa Placement Coach running at http://localhost:${PORT}`));
