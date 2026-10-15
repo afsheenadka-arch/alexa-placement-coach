@@ -71,7 +71,7 @@ module.exports = function mountMcp(app, core) {
     try {
       const { StreamableHTTPServerTransport } = await import("@modelcontextprotocol/sdk/server/streamableHttp.js");
       const server = await buildServer();
-      const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+      const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
       res.on("close", () => { transport.close(); server.close(); });
       await server.connect(transport);
       await transport.handleRequest(req, res, req.body);
