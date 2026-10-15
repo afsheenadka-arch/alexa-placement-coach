@@ -28,6 +28,7 @@
   .bar { display:flex; gap:8px; }
   input { flex:1; padding:12px 14px; border-radius:12px; border:1px solid var(--panel); background:var(--panel); color:var(--text); font:inherit; }
   .bar button { padding:0 16px; border:0; border-radius:12px; background:var(--ring); color:#06223d; font-weight:600; cursor:pointer; font:inherit; }
+  .tool { align-self:flex-start; font-family:Consolas, monospace; font-size:.8rem; color:var(--ring); padding:2px 4px; }
   :focus-visible { outline:3px solid #fff; outline-offset:2px; }
 </style>
 </head>
@@ -62,14 +63,63 @@ function speak(text) {
   u.onstart = () => ring.classList.add("live"); u.onend = () => ring.classList.remove("live");
   speechSynthesis.speak(u);
 }
+const TOPICS = ["linked lists", "arrays", "strings", "sorting", "trees", "graphs", "dp"];
+let rpcId = 1, quiz = null;
+
+// Call one MCP tool on the server (JSON-RPC "tools/call" over Streamable HTTP)
+async function callTool(name, args) {
+  const r = await fetch("/mcp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json, text/event-stream" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: rpcId++, method: "tools/call", params: { name, arguments: args } }),
+  });
+  const data = await r.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.result.content.map((c) => c.text).join("\n");
+}
+async function useTool(name, args) {
+  const d = document.createElement("div");
+  d.className = "tool"; d.textContent = "MCP tool call: " + name + " " + JSON.stringify(args);
+  chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+  return callTool(name, args);
+}
+function say(t) { add(t, "bot"); speak(t); }
+
+// Simple "brain": turn a sentence into a tool name and arguments
+function intent(s) {
+  const topic = TOPICS.find((t) => s.includes(t));
+  if (s.includes("quiz")) return topic ? { tool: "start_quiz", args: { topic } } : { say: "Which topic? Try: quiz me on arrays, strings, sorting, linked lists, trees, graphs, or dp." };
+  if (/summary|weekly|how did i do/.test(s)) return { tool: "get_weekly_summary", args: {} };
+  if (/plan|what should i/.test(s)) return { tool: "get_study_plan", args: {} };
+  if (/solved|did|completed|log/.test(s)) {
+    const m = s.match(/(\d+)/);
+    const count = Math.min(50, Math.max(1, m ? parseInt(m[1], 10) : 1));
+    return { tool: "log_progress", args: { topic: topic || "general", count } };
+  }
+  return { say: "I can log your progress, plan tonight's study, quiz you, or summarize your week." };
+}
+
 async function send(text) {
   text = text.trim(); if (!text) return;
   add(text, "me"); input.value = "";
+  const s = text.toLowerCase();
   try {
-    const r = await fetch("/api/command", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ text }) });
-    const { reply } = await r.json();
-    add(reply, "bot"); speak(reply);
-  } catch { add("Could not reach the server. Is it running?", "bot"); }
+    const letter = s.replace(/[^a-z]/g, "");
+    if (quiz && /^[abc]$/.test(letter)) {          // answering a quiz question
+      quiz.answers.push(letter); quiz.i++;
+      if (quiz.i < quiz.qs.length) return say(quiz.qs[quiz.i]);
+      const result = await useTool("grade_quiz", { topic: quiz.topic, answers: quiz.answers });
+      quiz = null; return say(result);
+    }
+    const it = intent(s);
+    if (it.say) return say(it.say);
+    const out = await useTool(it.tool, it.args);
+    if (it.tool === "start_quiz" && out.startsWith("Q1")) {   // ask questions one at a time
+      quiz = { topic: it.args.topic, qs: out.split("\n\n"), answers: [], i: 0 };
+      return say(quiz.qs[0]);
+    }
+    say(out);
+  } catch (e) { add("Could not reach the MCP server. Is it running? (" + e.message + ")", "bot"); }
 }
 document.getElementById("send").onclick = () => send(input.value);
 input.addEventListener("keydown", (e) => { if (e.key === "Enter") send(input.value); });
