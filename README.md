@@ -15,6 +15,7 @@ Built solo for the Amazon Developer Hackathon (Alexa+ track, simulated experienc
 ## MCP layer
 
 The coach's abilities are exposed as MCP tools over Streamable HTTP at `POST /mcp`: `log_progress`, `get_study_plan`, `get_weekly_summary`, `start_quiz`, `grade_quiz`. The web page is a simulated Alexa+ front end that calls these tools, and it shows each tool call in the chat. Any MCP client (for example the MCP Inspector) can connect to `http://localhost:3000/mcp`.
+The MCP server is built with the official TypeScript SDK (v1.x), which implements MCP protocol version 2025-11-25, over Streamable HTTP.
 
 ## Run it locally
 
