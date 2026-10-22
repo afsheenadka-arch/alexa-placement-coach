@@ -1,0 +1,77 @@
+# Friction Log: Alexa Placement Coach
+
+Track: Alexa+ (simulated experience backed by a real MCP server)
+Tools used: MCP TypeScript SDK 1.32.1 (protocol 2025-11-25), MCP Inspector, Node.js, Express, zod, Web Speech API
+Author: Afsheen (solo, first hackathon, first MCP project)
+
+## 1. Connecting the MCP Inspector to my HTTP server
+- **Task:** test my server at http://localhost:3000/mcp.
+- **Steps:** opened the Inspector and clicked Add server.
+- **Expected:** an obvious option for a Streamable HTTP URL.
+- **Actual:** the form defaulted to stdio (command and arguments), and the default example servers were unrelated.
+- **Severity:** Low
+- **Workaround:** switched the Transport dropdown to Streamable HTTP and entered the URL.
+- **Suggestion:** default to the most common transport, or add a short hint for connecting to a running HTTP server.
+
+## 2. Choosing an SDK version for the required spec
+- **Task:** meet the Alexa+ requirement of protocol version 2025-11-25.
+- **Steps:** installed the SDK and searched for supported versions.
+- **Expected:** a clear statement of which SDK line matches that spec version.
+- **Actual:** newer spec versions and SDK packages are also documented, so the right line was unclear.
+- **Severity:** Medium
+- **Workaround:** pinned @modelcontextprotocol/sdk@1 and confirmed LATEST_PROTOCOL_VERSION printed 2025-11-25.
+- **Suggestion:** add a table mapping spec versions to SDK versions to the hackathon resources.
+
+## 3. Repo-sharing instruction on the Rules page
+- **Task:** understand how to share my repo.
+- **Steps:** read the submission requirements.
+- **Expected:** one clear instruction.
+- **Actual:** a public licensed repo was acceptable, but the private-repo text listed a GitHub username that is not in Amazon's official list just above it.
+- **Severity:** Low
+- **Workaround:** kept the repo public with an MIT license.
+- **Suggestion:** reconcile the usernames and state the instruction once.
+
+## 4. How the simulated Alexa+ path is scored
+- **Task:** decide how much MCP to build.
+- **Steps:** read the track description and judging criteria.
+- **Expected:** clear guidance on Tech Implementation for the simulated path.
+- **Actual:** the path is exempt from the runtime-technology requirement, but the criterion talks about effectively using the required tech.
+- **Severity:** Medium
+- **Workaround:** built a real MCP server behind the simulation.
+- **Suggestion:** add one sentence explaining how simulated entries are scored.
+
+## 5. Rules and FAQ describe the simulated path differently
+- **Task:** understand what the simulated path must show.
+- **Steps:** read the Rules, then the organizer FAQ.
+- **Expected:** one consistent statement.
+- **Actual:** the Rules say no MCP-shaped surface is required; the FAQ says a web page acting as a real MCP client over Streamable HTTP satisfies the requirement.
+- **Severity:** Low
+- **Workaround:** built a real MCP server and a web page that calls its tools.
+- **Suggestion:** move the FAQ clarification into the Rules or Resources page.
+
+## 6. PowerShell blocked npm
+- **Task:** run npm -v on Windows.
+- **Steps:** opened PowerShell and ran the command after installing Node.js.
+- **Expected:** a version number.
+- **Actual:** "running scripts is disabled on this system" (npm.ps1 blocked).
+- **Severity:** Medium
+- **Workaround:** Set-ExecutionPolicy -Scope CurrentUser RemoteSigned.
+- **Suggestion:** mention this in beginner setup guides for Windows.
+
+## 7. Node installer's optional tools step
+- **Task:** install Node.js.
+- **Steps:** ran the installer and left the extra-tools option ticked.
+- **Expected:** a quick install.
+- **Actual:** an optional step opened a window with Visual Studio Installer feed errors.
+- **Severity:** Low
+- **Workaround:** ignored it, since my project has no native modules.
+- **Suggestion:** explain that the step is optional and when it is needed.
+
+## 8. npm vulnerability warnings on a fresh install
+- **Task:** run npm install.
+- **Steps:** installed Express and ran npm install.
+- **Expected:** a clean install.
+- **Actual:** 7 vulnerabilities reported, from an older Express version.
+- **Severity:** Low
+- **Workaround:** upgraded within Express 4 and avoided npm audit fix --force.
+- **Suggestion:** starter templates should pin current versions.
